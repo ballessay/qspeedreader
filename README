@@ -1,0 +1,21 @@
+|-------------------------------------------------------------------------------
+|
+| QSpeedReader
+|
+| author:   Christian Balles
+| email:    code@ballessay.de
+| date:     2009/11/28
+| version:  0.1
+|------------------------------------------------------------------------------
+
+Info: This is a simple speed reading software written in C++ using Qt
+
+Building:
+1. qmake
+2. make
+
+After these two steps there will be an executable in the bin/ directory
+
+Usage:
+Version 0.1 will only support text intput from the clipboard
+
