@@ -18,10 +18,11 @@ public:
   ~CMainWindow();
 
 protected slots:
-  void on_pStartButton_clicked(bool _check);
+  void on_pStartButton_clicked(bool _checked);
   void on_pFontButton_clicked();
   void on_pWPMspinBox_valueChanged(int _value);
   void on_pColorsButton_clicked();
+  void on_pRepeatCheckBox_clicked(bool _checked);
   void displayNext();
 
   void backgroundChanged(const QColor& _color);

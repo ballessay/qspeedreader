@@ -18,6 +18,8 @@ HEADERS += mainwindow.h \
 FORMS += mainwindow.ui \
          colordialog.ui
 OTHER_FILES += README
+TRANSLATIONS = lang/qspeedreader_en.ts \
+               lang/qspeedreader_de.ts
 # switch on extra compiler stuff
 QMAKE_CXXFLAGS=-ansi -Wall
 QMAKE_CXXFLAGS_RELEASE=-mmmx -msse -Os

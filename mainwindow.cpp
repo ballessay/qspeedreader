@@ -3,7 +3,7 @@
 #include "colordialog.h"
 #include <QClipboard>
 #include <QFontDialog>
-
+#include <QMouseEvent>
 
 CMainWindow::CMainWindow(QWidget* _pParent)
   : QMainWindow(_pParent),
@@ -16,18 +16,26 @@ CMainWindow::CMainWindow(QWidget* _pParent)
   m_pUi->pTextLabel->setFont(m_settings.font());
 
   QPalette p(m_pUi->pTextLabel->palette());
-  // Set background colour to black
+  // Set background and foreground color
   p.setColor(QPalette::Background, m_settings.background());
   p.setColor(QPalette::Foreground, m_settings.foreground());
   m_pUi->pTextLabel->setPalette(p);
 
+  // set words per minute value
   m_pUi->pWPMspinBox->setValue(m_settings.wpm());
+
+  // set check box value
+  m_pUi->pRepeatCheckBox->setChecked(m_settings.repeat());
 
   // connect the timer to the local slot
   connect(&m_timer, SIGNAL(timeout()),
           this, SLOT(displayNext()));
 
+  // connect menu actions and extra stuff
   connectMenu();
+
+  //hide status bar
+  statusBar()->setVisible(false);
 }
 
 CMainWindow::~CMainWindow()
@@ -37,9 +45,10 @@ CMainWindow::~CMainWindow()
 
 void CMainWindow::on_pStartButton_clicked(bool _checked)
 {
-  if(_checked)
+  if(_checked || !m_timer.isActive())
   {
     m_timer.setInterval(m_settings.interval());
+    m_settings.save();
     // get text from clipboard and split it to a stringlist
     m_tokens = QApplication::clipboard()->text().split(" ");
     // init the index
@@ -48,6 +57,7 @@ void CMainWindow::on_pStartButton_clicked(bool _checked)
     m_timer.start();
     // change the button text
     m_pUi->pStartButton->setText(tr("Stop"));
+    m_pUi->pStartButton->setChecked(true);
   }
   else
   {
@@ -55,6 +65,7 @@ void CMainWindow::on_pStartButton_clicked(bool _checked)
     m_timer.stop();
     // change the button text
     m_pUi->pStartButton->setText(tr("Start"));
+    m_pUi->pStartButton->setChecked(false);
   }
 }
 
@@ -91,19 +102,32 @@ void CMainWindow::on_pColorsButton_clicked()
   }
 }
 
+void CMainWindow::on_pRepeatCheckBox_clicked(bool _checked)
+{
+  m_settings.setRepeat(_checked);
+}
+
 void CMainWindow::displayNext()
 {
   // display the text at index, then increment index
   m_pUi->pTextLabel->setText(m_tokens.at(m_index++));
+
   // if index has reached the last element
   if(m_index >= m_tokens.size())
   {
-    // stop the timer
-    m_timer.stop();
-    // set the button unchecked
-    m_pUi->pStartButton->setChecked(false);
-    // change the text of the button
-    m_pUi->pStartButton->setText(tr("Start"));
+    if(m_settings.repeat())
+    {
+      m_index = 0;
+    }
+    else
+    {
+      // stop the timer
+      m_timer.stop();
+      // set the button unchecked
+      m_pUi->pStartButton->setChecked(false);
+      // change the text of the button
+      m_pUi->pStartButton->setText(tr("Start"));
+    }
   }
 }
 
@@ -127,12 +151,10 @@ void CMainWindow::toggleFullscreen()
 {
   if(isFullScreen())
   {
-    m_pUi->pSettingsFrame->setVisible(true);
     setWindowState(m_lastState);
   }
   else
   {
-    m_pUi->pSettingsFrame->setVisible(false);
     m_lastState = windowState();
     setWindowState(Qt::WindowFullScreen);
   }
@@ -163,6 +185,8 @@ void CMainWindow::connectMenu()
           this, SLOT(quitApplication()));
   connect(m_pUi->actionFullscreen, SIGNAL(triggered()),
           this, SLOT(toggleFullscreen()));
+  connect(m_pUi->actionRun, SIGNAL(triggered(bool)),
+          this, SLOT(on_pStartButton_clicked(bool)));
 }
 
 
