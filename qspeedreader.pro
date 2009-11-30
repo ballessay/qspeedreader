@@ -23,7 +23,7 @@ TRANSLATIONS = lang/qspeedreader_en.ts \
     lang/qspeedreader_de.ts
 
 #generate a make install step
-target.path = $$INSTALLBASE/$(DESTDIR)
+target.path = $$INSTALLBASE/usr/bin
 INSTALLS += target
 
 # switch on extra compiler stuff
