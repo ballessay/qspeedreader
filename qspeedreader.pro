@@ -22,6 +22,10 @@ OTHER_FILES += README \
 TRANSLATIONS = lang/qspeedreader_en.ts \
     lang/qspeedreader_de.ts
 
+#generate a make install step
+target.path = /usr/bin
+INSTALLS += target
+
 # switch on extra compiler stuff
 QMAKE_CXXFLAGS = -ansi \
     -Wall

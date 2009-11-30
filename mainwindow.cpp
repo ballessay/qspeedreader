@@ -24,6 +24,7 @@
 #include <QClipboard>
 #include <QFontDialog>
 #include <QMouseEvent>
+#include <QFile>
 
 CMainWindow::CMainWindow(QWidget* _pParent)
   : QMainWindow(_pParent),
@@ -35,10 +36,12 @@ CMainWindow::CMainWindow(QWidget* _pParent)
 
   m_pUi->pTextLabel->setFont(m_settings.font());
 
+  // get the labels palette
   QPalette p(m_pUi->pTextLabel->palette());
-  // Set background and foreground color
+  // set background and foreground color
   p.setColor(QPalette::Background, m_settings.background());
   p.setColor(QPalette::Foreground, m_settings.foreground());
+  // set modified palette
   m_pUi->pTextLabel->setPalette(p);
 
   // set words per minute value
@@ -56,6 +59,42 @@ CMainWindow::CMainWindow(QWidget* _pParent)
 
   //hide status bar
   statusBar()->setVisible(false);
+
+  // read stdin
+  QFile file;
+  if(file.open(0, QIODevice::ReadOnly) && file.bytesAvailable())
+  {
+    m_tokens = QString(file.readAll()).split(" ");
+    file.close();
+  }
+
+  // quick-n-dirty solution ---------------
+  // get arguments
+  QStringList args = qApp->arguments();
+  for( int i = 0; i < args.size(); ++i)
+  {
+    // get i-th argument
+    QString arg = args.at(i);
+    // check for option
+    if(arg == "-f" || arg == "--fullscreen")
+    {
+      toggleFullscreen();
+    }
+    if(arg == "-h" || arg == "--help")
+    {
+      qDebug("./qspeedreader -h || -f");
+      qApp->quit();
+    }
+  }
+
+  // if we have tokens at this moment -> start for one run
+  if(0 < m_tokens.size())
+  {
+    on_pStartButton_clicked(true);
+
+    connect(this, SIGNAL(finished()),
+            this, SLOT(close()));
+  }
 }
 
 CMainWindow::~CMainWindow()
@@ -96,8 +135,10 @@ void CMainWindow::on_pFontButton_clicked()
   dialog.setCurrentFont(m_settings.font());
   if( dialog.exec())
   {
+    // if Ok pressed -> set and save the font
     m_pUi->pTextLabel->setFont(dialog.currentFont());
     m_settings.setFont(dialog.currentFont());
+    m_settings.save();
   }
 }
 
@@ -135,8 +176,12 @@ void CMainWindow::displayNext()
   // if index has reached the last element
   if(m_index >= m_tokens.size())
   {
+    // signal that the run is finished
+    emit finished();
+    // if repeating is set...
     if(m_settings.repeat())
     {
+      //...start from begin
       m_index = 0;
     }
     else
@@ -171,11 +216,14 @@ void CMainWindow::toggleFullscreen()
 {
   if(isFullScreen())
   {
+    // set the last saved state
     setWindowState(m_lastState);
   }
   else
   {
+    // save current state
     m_lastState = windowState();
+    // set fullscreen
     setWindowState(Qt::WindowFullScreen);
   }
 }

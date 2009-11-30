@@ -37,6 +37,9 @@ public:
   CMainWindow(QWidget* _pParent = 0);
   ~CMainWindow();
 
+signals:
+  void finished();
+
 protected slots:
   void on_pStartButton_clicked(bool _checked);
   void on_pFontButton_clicked();
