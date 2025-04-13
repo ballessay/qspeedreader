@@ -2,13 +2,15 @@
 
 #define DEF_CONST(str) static const char* c_##str = #str
 
-DEF_CONST(foreground);
-DEF_CONST(background);
-DEF_CONST(font);
-DEF_CONST(wordsperminute);
-DEF_CONST(interval);
-DEF_CONST(repeat);
-
+namespace
+{
+    DEF_CONST(foreground);
+    DEF_CONST(background);
+    DEF_CONST(font);
+    DEF_CONST(wordsperminute);
+    DEF_CONST(interval);
+    DEF_CONST(repeat);
+}
 
 // constructor loads saved values or sets the defaults
 CSettings::CSettings()
@@ -16,7 +18,7 @@ CSettings::CSettings()
     m_background(QColor(127, 127, 127)),
     m_font(QFont()),
     m_repeat(false),
-    m_settings("ballessay", "qspeedrunner")
+    m_settings(QSettings::IniFormat, QSettings::UserScope, "ballessay", "qspeedreader")
 {
   setWPM(250);
 

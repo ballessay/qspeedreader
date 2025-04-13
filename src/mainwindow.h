@@ -1,9 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "settings.h"
+
 #include <QMainWindow>
 #include <QTimer>
-#include "settings.h"
+
+#include <memory>
 
 namespace Ui {
     class CMainWindow;
@@ -14,18 +17,18 @@ class CMainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-  CMainWindow(QWidget* _pParent = 0);
+  CMainWindow(QWidget* _pParent = nullptr);
   ~CMainWindow();
 
 signals:
   void finished();
 
 protected slots:
-  void on_pStartButton_clicked(bool _checked);
-  void on_pFontButton_clicked();
-  void on_pWPMspinBox_valueChanged(int _value);
-  void on_pColorsButton_clicked();
-  void on_pRepeatCheckBox_clicked(bool _checked);
+  void OnStartButtonClicked(bool _checked);
+  void OnFontButtonClicked();
+  void OnWPMspinBoxValueChanged(int _value);
+  void OnColorsButtonClicked();
+  void OnRepeatCheckBoxClicked(bool _checked);
   void displayNext();
 
   void backgroundChanged(const QColor& _color);
@@ -39,7 +42,7 @@ protected:
   void connectMenu();
 
 private:
-  Ui::CMainWindow*  m_pUi;
+  std::unique_ptr<Ui::CMainWindow> m_spUi;
   QTimer            m_timer;
   QStringList       m_tokens;
   long              m_index;

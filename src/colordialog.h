@@ -2,6 +2,7 @@
 #define COLORDIALOG_H
 
 #include <QDialog>
+#include <memory>
 
 namespace Ui {
     class CColorDialog;
@@ -12,9 +13,9 @@ class CColorDialog : public QDialog
   Q_OBJECT
 
 public:
-  CColorDialog( const QColor& _foreground,
-                const QColor& _background,
-                QWidget* _pParent = 0);
+  CColorDialog(const QColor& _foreground,
+               const QColor& _background,
+               QWidget* _pParent = nullptr);
   ~CColorDialog();
 
   QColor foreground() const { return m_foreground;}
@@ -25,14 +26,15 @@ signals:
   void foregroundChanged(const QColor& _color);
 
 protected slots:
-  void on_pForegroundButton_clicked();
-  void on_pBackgroundButton_clicked();
+  void OnForegroundButtonClicked();
+  void OnBackgroundButtonClicked();
 
 protected:
   void changeEvent(QEvent* _pEvent);
 
 private:
-  Ui::CColorDialog* m_pUi;
+  std::unique_ptr<Ui::CColorDialog> m_spUi;
+
   QColor            m_foreground;
   QColor            m_background;
 };

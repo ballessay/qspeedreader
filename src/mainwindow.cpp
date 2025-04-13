@@ -8,36 +8,44 @@
 
 CMainWindow::CMainWindow(QWidget* _pParent)
   : QMainWindow(_pParent),
-    m_pUi(new Ui::CMainWindow),
+    m_spUi(std::make_unique<Ui::CMainWindow>()),
     m_index(0)
 {
-  // setup the stuff created with designer
-  m_pUi->setupUi(this);
+  m_spUi->setupUi(this);
 
-  m_pUi->pTextLabel->setFont(m_settings.font());
+  m_spUi->pTextLabel->setFont(m_settings.font());
 
-  // get the labels palette
-  QPalette p(m_pUi->pTextLabel->palette());
-  // set background and foreground color
+  QPalette p(m_spUi->pTextLabel->palette());
   p.setColor(QPalette::Window, m_settings.background());
   p.setColor(QPalette::Text, m_settings.foreground());
-  // set modified palette
-  m_pUi->pTextLabel->setPalette(p);
+  m_spUi->pTextLabel->setPalette(p);
 
-  // set words per minute value
-  m_pUi->pWPMspinBox->setValue(m_settings.wpm());
+  m_spUi->pWPMspinBox->setValue(m_settings.wpm());
 
-  // set check box value
-  m_pUi->pRepeatCheckBox->setChecked(m_settings.repeat());
+  m_spUi->pRepeatCheckBox->setChecked(m_settings.repeat());
 
-  // connect the timer to the local slot
-  connect(&m_timer, SIGNAL(timeout()),
-          this, SLOT(displayNext()));
 
-  // connect menu actions and extra stuff
+  connect(m_spUi->pStartButton, &QPushButton::clicked,
+          this, &CMainWindow::OnStartButtonClicked);
+
+  connect(m_spUi->pFontButton, &QPushButton::clicked,
+          this, &CMainWindow::OnFontButtonClicked);
+
+  connect(m_spUi->pWPMspinBox, &QSpinBox::valueChanged,
+          this, &CMainWindow::OnWPMspinBoxValueChanged);
+
+  connect(m_spUi->pColorsButton, &QPushButton::clicked,
+          this, &CMainWindow::OnColorsButtonClicked);
+
+  connect(m_spUi->pRepeatCheckBox, &QCheckBox::clicked,
+          this, &CMainWindow::OnRepeatCheckBoxClicked);
+
+
+  connect(&m_timer, &QTimer::timeout,
+          this, &CMainWindow::displayNext);
+
   connectMenu();
 
-  //hide status bar
   statusBar()->setVisible(false);
 
   // read stdin
@@ -70,19 +78,18 @@ CMainWindow::CMainWindow(QWidget* _pParent)
   // if we have tokens at this moment -> start for one run
   if(0 < m_tokens.size())
   {
-    on_pStartButton_clicked(true);
+    OnStartButtonClicked(true);
 
-    connect(this, SIGNAL(finished()),
-            this, SLOT(close()));
+    connect(this, &CMainWindow::finished,
+            this, &CMainWindow::close);
   }
 }
 
 CMainWindow::~CMainWindow()
 {
-  delete m_pUi;
 }
 
-void CMainWindow::on_pStartButton_clicked(bool _checked)
+void CMainWindow::OnStartButtonClicked(bool _checked)
 {
   if(_checked || !m_timer.isActive())
   {
@@ -92,23 +99,22 @@ void CMainWindow::on_pStartButton_clicked(bool _checked)
     m_tokens = QApplication::clipboard()->text().split(" ");
     // init the index
     m_index = 0;
-    // start the timer
+
     m_timer.start();
-    // change the button text
-    m_pUi->pStartButton->setText(tr("Stop"));
-    m_pUi->pStartButton->setChecked(true);
+
+    m_spUi->pStartButton->setText(tr("Stop"));
+    m_spUi->pStartButton->setChecked(true);
   }
   else
   {
-    // stop the timer
     m_timer.stop();
-    // change the button text
-    m_pUi->pStartButton->setText(tr("Start"));
-    m_pUi->pStartButton->setChecked(false);
+
+    m_spUi->pStartButton->setText(tr("Start"));
+    m_spUi->pStartButton->setChecked(false);
   }
 }
 
-void CMainWindow::on_pFontButton_clicked()
+void CMainWindow::OnFontButtonClicked()
 {
   // create dialog, set old font, if OK -> set the new font
   QFontDialog dialog;
@@ -116,26 +122,26 @@ void CMainWindow::on_pFontButton_clicked()
   if( dialog.exec())
   {
     // if Ok pressed -> set and save the font
-    m_pUi->pTextLabel->setFont(dialog.currentFont());
+    m_spUi->pTextLabel->setFont(dialog.currentFont());
     m_settings.setFont(dialog.currentFont());
     m_settings.save();
   }
 }
 
-void CMainWindow::on_pWPMspinBox_valueChanged(int _value)
+void CMainWindow::OnWPMspinBoxValueChanged(int _value)
 {
   m_settings.setWPM(_value);
   // set the new interval on demand
   m_timer.setInterval(m_settings.interval());
 }
 
-void CMainWindow::on_pColorsButton_clicked()
+void CMainWindow::OnColorsButtonClicked()
 {
   CColorDialog dialog( m_settings.foreground(), m_settings.background());
-  connect(&dialog, SIGNAL(backgroundChanged(const QColor&)),
-         this, SLOT(backgroundChanged(const QColor&)));
-  connect(&dialog, SIGNAL(foregroundChanged(const QColor&)),
-          this, SLOT(foregroundChanged(const QColor&)));
+  connect(&dialog, &CColorDialog::backgroundChanged,
+         this, &CMainWindow::backgroundChanged);
+  connect(&dialog, &CColorDialog::foregroundChanged,
+          this, &CMainWindow::foregroundChanged);
   if(dialog.exec())
   {
     m_settings.setBackground(dialog.background());
@@ -143,7 +149,7 @@ void CMainWindow::on_pColorsButton_clicked()
   }
 }
 
-void CMainWindow::on_pRepeatCheckBox_clicked(bool _checked)
+void CMainWindow::OnRepeatCheckBoxClicked(bool _checked)
 {
   m_settings.setRepeat(_checked);
 }
@@ -151,7 +157,7 @@ void CMainWindow::on_pRepeatCheckBox_clicked(bool _checked)
 void CMainWindow::displayNext()
 {
   // display the text at index, then increment index
-  m_pUi->pTextLabel->setText(m_tokens.at(m_index++));
+  m_spUi->pTextLabel->setText(m_tokens.at(m_index++));
 
   // if index has reached the last element
   if(m_index >= m_tokens.size())
@@ -169,9 +175,9 @@ void CMainWindow::displayNext()
       // stop the timer
       m_timer.stop();
       // set the button unchecked
-      m_pUi->pStartButton->setChecked(false);
+      m_spUi->pStartButton->setChecked(false);
       // change the text of the button
-      m_pUi->pStartButton->setText(tr("Start"));
+      m_spUi->pStartButton->setText(tr("Start"));
     }
   }
 }
@@ -179,17 +185,17 @@ void CMainWindow::displayNext()
 void CMainWindow::backgroundChanged(const QColor& _color)
 {
   m_settings.setBackground(_color);
-  QPalette p(m_pUi->pTextLabel->palette());
+  QPalette p(m_spUi->pTextLabel->palette());
   p.setColor(QPalette::Window, m_settings.background());
-  m_pUi->pTextLabel->setPalette(p);
+  m_spUi->pTextLabel->setPalette(p);
 }
 
 void CMainWindow::foregroundChanged(const QColor& _color)
 {
   m_settings.setForeground(_color);
-  QPalette p(m_pUi->pTextLabel->palette());
+  QPalette p(m_spUi->pTextLabel->palette());
   p.setColor(QPalette::Text, m_settings.foreground());
-  m_pUi->pTextLabel->setPalette(p);
+  m_spUi->pTextLabel->setPalette(p);
 }
 
 void CMainWindow::toggleFullscreen()
@@ -220,7 +226,7 @@ void CMainWindow::changeEvent(QEvent* _pEvent)
   switch (_pEvent->type())
   {
   case QEvent::LanguageChange:
-    m_pUi->retranslateUi(this);
+    m_spUi->retranslateUi(this);
     break;
   default:
     break;
@@ -229,12 +235,12 @@ void CMainWindow::changeEvent(QEvent* _pEvent)
 
 void CMainWindow::connectMenu()
 {
-  connect(m_pUi->actionQuit, SIGNAL(triggered()),
-          this, SLOT(quitApplication()));
-  connect(m_pUi->actionFullscreen, SIGNAL(triggered()),
-          this, SLOT(toggleFullscreen()));
-  connect(m_pUi->actionRun, SIGNAL(triggered(bool)),
-          this, SLOT(on_pStartButton_clicked(bool)));
+  connect(m_spUi->actionQuit, &QAction::triggered,
+          this, &CMainWindow::quitApplication);
+  connect(m_spUi->actionFullscreen, &QAction::triggered,
+          this, &CMainWindow::toggleFullscreen);
+  connect(m_spUi->actionRun, &QAction::triggered,
+          this, &CMainWindow::OnStartButtonClicked);
 }
 
 

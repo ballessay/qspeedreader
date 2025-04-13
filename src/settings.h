@@ -18,18 +18,22 @@ public:
   void save();
 
   QColor foreground() const { return m_foreground; }
-  QColor background() const { return m_background; }
-  QFont font() const { return m_font; }
-  int interval() const { return m_interval; }
-  int wpm() const { return m_wpm; }
-  bool repeat() const { return m_repeat; }
-
   void setForeground(const QColor& _color) { m_foreground = _color; }
+
+  QColor background() const { return m_background; }
   void setBackground(const QColor& _color) { m_background = _color; }
-  void setFont( const QFont& _font) { m_font = _font; }
-  void setWPM( const int _wpm) { m_wpm = _wpm; m_interval = c_maxWPM / m_wpm;}
-  void setInterval( const int _interval) { m_interval = _interval; }
-  void setRepeat( const bool _repeat) { m_repeat = _repeat; }
+
+  QFont font() const { return m_font; }
+  void setFont(const QFont& _font) { m_font = _font; }
+
+  int interval() const { return m_interval; }
+  void setInterval(int _interval) { m_interval = _interval; }
+
+  int wpm() const { return m_wpm; }
+  void setWPM(int _wpm) { m_wpm = _wpm; m_interval = c_maxWPM / m_wpm;}
+
+  bool repeat() const { return m_repeat; }
+  void setRepeat(bool _repeat) { m_repeat = _repeat; }
 
 private:
   Q_DISABLE_COPY(CSettings)
