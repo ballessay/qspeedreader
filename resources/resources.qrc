@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qspeedreader.png</file>
+    </qresource>
+</RCC>

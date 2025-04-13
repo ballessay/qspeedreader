@@ -24,6 +24,7 @@ add_executable(${PROJECT_NAME}
     src/mainwindow.ui
     src/settings.h
     src/settings.cpp
+    resources/resources.qrc
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -71,8 +72,7 @@ endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install(FILES resources/org.ballessay.qspeedreader.desktop DESTINATION share/applications)
-    install(FILES resources/qspeedreader.png DESTINATION share/icons/hicolor/256x256/apps)
-    install(FILES resources/qspeedreader.appdata.xml DESTINATION share/metainfo)
+    install(FILES resources/qspeedreader.png DESTINATION share/icons/hicolor/128x128/apps)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 

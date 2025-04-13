@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Comment=A simpple speed reader
+Name=qspeedreader
+Exec=qspeedreader
+Icon=qspeedreader
+Categories=Development;
