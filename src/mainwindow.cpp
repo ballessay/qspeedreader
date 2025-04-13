@@ -1,23 +1,3 @@
-/*
-| author:   Christian Balles
-| email:    code@ballessay.de
-| date:     2009/11/28
-| version:  0.1
-| copyright 2009 Christian Balles
-|
-|   This file is part of qspeedreader.
-|   qspeedreader is free software: you can redistribute it and/or modify it
-|   under the terms of the GNU General Public License as published by the Free
-|   Software Foundation, either version 2 of the License, or (at your option)
-|   any later version.
-|   qspeedreader is distributed in the hope that it will be useful, but
-|   WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-|   or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-|   more details.
-|   You should have received a copy of the GNU General Public License along with
-|   qspeedreader. If not, see http://www.gnu.org/licenses/.
-*/
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "colordialog.h"
@@ -39,8 +19,8 @@ CMainWindow::CMainWindow(QWidget* _pParent)
   // get the labels palette
   QPalette p(m_pUi->pTextLabel->palette());
   // set background and foreground color
-  p.setColor(QPalette::Background, m_settings.background());
-  p.setColor(QPalette::Foreground, m_settings.foreground());
+  p.setColor(QPalette::Window, m_settings.background());
+  p.setColor(QPalette::Text, m_settings.foreground());
   // set modified palette
   m_pUi->pTextLabel->setPalette(p);
 
@@ -152,10 +132,10 @@ void CMainWindow::on_pWPMspinBox_valueChanged(int _value)
 void CMainWindow::on_pColorsButton_clicked()
 {
   CColorDialog dialog( m_settings.foreground(), m_settings.background());
-  connect( &dialog, SIGNAL(backgroundChanged(const QColor&)),
-           this, SLOT(backgroundChanged(const QColor&)));
-  connect( &dialog, SIGNAL(foregroundChanged(const QColor&)),
-           this, SLOT(foregroundChanged(const QColor&)));
+  connect(&dialog, SIGNAL(backgroundChanged(const QColor&)),
+         this, SLOT(backgroundChanged(const QColor&)));
+  connect(&dialog, SIGNAL(foregroundChanged(const QColor&)),
+          this, SLOT(foregroundChanged(const QColor&)));
   if(dialog.exec())
   {
     m_settings.setBackground(dialog.background());
@@ -200,7 +180,7 @@ void CMainWindow::backgroundChanged(const QColor& _color)
 {
   m_settings.setBackground(_color);
   QPalette p(m_pUi->pTextLabel->palette());
-  p.setColor(QPalette::Background, m_settings.background());
+  p.setColor(QPalette::Window, m_settings.background());
   m_pUi->pTextLabel->setPalette(p);
 }
 
@@ -208,7 +188,7 @@ void CMainWindow::foregroundChanged(const QColor& _color)
 {
   m_settings.setForeground(_color);
   QPalette p(m_pUi->pTextLabel->palette());
-  p.setColor(QPalette::Foreground, m_settings.foreground());
+  p.setColor(QPalette::Text, m_settings.foreground());
   m_pUi->pTextLabel->setPalette(p);
 }
 
